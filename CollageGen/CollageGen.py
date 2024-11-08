@@ -54,6 +54,7 @@ def create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 20
 path = "/Documents/dev/scrapbook"
 # image_paths = [f for f in os.listdir(path) if os.isfile(os.join(path, f))]
 print(os.getenv("HOME"))
+print(os.listdir(os.getenv("HOME")))
 # image_paths = [f'path/to/your/image_{i}.jpg' for i in range(1, 19)]  # Adjust with your actual image paths
 output_dir = 'output/grids'
 # create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 200))
