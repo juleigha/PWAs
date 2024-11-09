@@ -1,5 +1,6 @@
-from PIL import Image
+import sys
 import os
+from PIL import Image
 
 def resize_and_convert_icon(input_path, output_dir, sizes=[48, 72, 96, 192, 512]):
     """
@@ -29,7 +30,15 @@ def resize_and_convert_icon(input_path, output_dir, sizes=[48, 72, 96, 192, 512]
         
         print(f"Saved resized icon: {output_path}")
 
-# Example usage
-input_path = "path/to/your/image.webp"   # Replace with your .webp file path
-output_dir = "icons"                     # Directory to save resized images
-resize_and_convert_icon(input_path, output_dir)
+if __name__ == "__main__":
+    # Check if the correct number of arguments are provided
+    if len(sys.argv) != 3:
+        print("Usage: python resize_icons.py <input_image> <output_directory>")
+        sys.exit(1)
+
+    # Get input and output paths from command-line arguments
+    input_image = sys.argv[1]
+    output_directory = sys.argv[2]
+
+    # Execute the resizing and conversion
+    resize_and_convert_icon(input_image, output_directory)
