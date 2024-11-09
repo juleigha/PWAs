@@ -22,7 +22,7 @@ def resize_and_convert_icon(input_path, output_dir, sizes=[48, 72, 96, 192, 512]
 
     for size in sizes:
         # Resize the image
-        resized_img = img.resize((size, size), Image.ANTIALIAS)
+        resized_img = img.resize((size, size), Image.LANCZOS)
         
         # Define the output path and save as PNG
         output_path = os.path.join(output_dir, f"icon-{size}.png")
@@ -32,13 +32,13 @@ def resize_and_convert_icon(input_path, output_dir, sizes=[48, 72, 96, 192, 512]
 
 if __name__ == "__main__":
     # Check if the correct number of arguments are provided
-    if len(sys.argv) != 3:
-        print("Usage: python resize_icons.py <input_image> <output_directory>")
+    if len(sys.argv) != 2:
+        print("Usage: python resize_icons.py <input_image>")
         sys.exit(1)
 
     # Get input and output paths from command-line arguments
     input_image = sys.argv[1]
-    output_directory = sys.argv[2]
+    output_directory = "pwa_icons/"
 
     # Execute the resizing and conversion
     resize_and_convert_icon(input_image, output_directory)

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Grid Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input { margin: 10px 0; }
+        canvas { margin: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Image Grid Generator</h1>
+    <p>Select images to create 2x2 grids.</p>
+    <input type="file" id="fileInput" multiple accept="image/*">
+    <button onclick="generateGrids()">Generate Grids</button>
+    <div id="output"></div>
+    <script src="main.js"></script>
+</body>
+</html>
