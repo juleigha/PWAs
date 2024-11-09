@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Grid Generator</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff">
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input { margin: 10px 0; }
-        canvas { margin: 10px; border: 1px solid #ccc; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CollageGen</title>
+    <link rel="stylesheet" href="master.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
-    <h1>Image Grid Generator</h1>
-    <p>Select images to create 2x2 grids.</p>
-    <input type="file" id="fileInput" multiple accept="image/*">
-    <button onclick="generateGrids()">Generate Grids</button>
-    <div id="output"></div>
+    <div class="container">
+        <h1>CollageGen</h1>
+        <div class="controls">
+            <label for="fileInput">Select Images</label>
+            <input type="file" id="fileInput" multiple accept="image/*">
+            <button id="generate-collage" onclick="generateCollage()">Generate Collage</button>
+            <button id="download-all" onclick="downloadAllImages()">Download All</button>
+        </div>
+        <div id="loading-indicator" class="loading-indicator hidden">Generating Collage...</div>
+        <div id="collage-container" class="collage-container"></div>
+    </div>
     <script src="main.js"></script>
 </body>
 </html>
