@@ -24,5 +24,18 @@
         <div id="collage-container" class="collage-container"></div>
     </div>
     <script src="main.js"></script>
+    <script>
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js', {}).then(function(reg) {
+                    reg.update();
+                }, function(err) {
+                    console.log(err);
+                });
+            });
+        }
+
+
+    </script>
 </body>
 </html>
