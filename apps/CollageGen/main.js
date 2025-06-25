@@ -1,4 +1,4 @@
-const collageImages = []
+const collageImages = [];
 
 function toggleLoading(show) {
     const loadingIndicator = document.getElementById("loading-indicator");
@@ -10,28 +10,32 @@ function toggleLoading(show) {
 }
 
 async function generateCollage() {
-    toggleLoading(true)
+    toggleLoading(true);
     const fileInput = document.getElementById('fileInput');
     const outputDiv = document.getElementById('collage-container');
-    const gridSize = 2;
-    const imageheight = 150;
-    const imagewidth = 225;
-    
+    const gridSize = 2; // 2x2 grid
+    const canvasWidth = 1200; // 4 inches at 300 DPI
+    const canvasHeight = 1800; // 6 inches at 300 DPI
+    const imageWidth = canvasWidth / gridSize;
+    const imageHeight = canvasHeight / gridSize;
+    const maxWidth = 600;
+    const maxHeight = 900;
+
     if (!fileInput.files.length) {
         alert('Please select some images!');
+        toggleLoading(false);
         return;
     }
 
-    // Convert file inputs to images
     const images = await Promise.all([...fileInput.files].map(file => loadImage(file)));
     const numGrids = Math.ceil(images.length / (gridSize * gridSize));
 
-    outputDiv.innerHTML = '';  // Clear previous grids
+    outputDiv.innerHTML = ''; 
 
     for (let gridIndex = 0; gridIndex < numGrids; gridIndex++) {
         const canvas = document.createElement('canvas');
-        canvas.width = imagewidth * gridSize;
-        canvas.height = imageheight * gridSize;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -43,18 +47,47 @@ async function generateCollage() {
             const img = images[imgIndex];
             const col = i % gridSize;
             const row = Math.floor(i / gridSize);
-            ctx.drawImage(img, col * imagewidth, row * imageheight, imagewidth, imageheight);
+
+            const aspectRatio = img.width / img.height;
+            let drawWidth, drawHeight;
+            if (aspectRatio <= 1) {
+                // Landscape orientation
+                drawWidth = imageWidth;
+                drawHeight = imageWidth / aspectRatio;
+                drawWidth = drawWidth > maxWidth ? maxWidth : drawWidth;
+                drawHeight = drawHeight > maxHeight ? maxHeight : drawHeight;
+                
+            } else {
+                // Portrait orientation, rotate
+                drawHeight = imageHeight;
+                drawWidth = imageHeight * aspectRatio;
+                drawHeight = drawHeight > maxHeight ? maxHeight : drawHeight;
+                drawWidth = drawWidth > maxWidth ? maxWidth : drawWidth;
+                ctx.save();
+                ctx.translate((col + 0.5) * imageWidth, (row + 0.5) * imageHeight);
+                ctx.rotate(-Math.PI / 2); 
+                ctx.drawImage(
+                    img,
+                    -drawHeight / 2,
+                    -drawWidth / 2,
+                    drawHeight,
+                    drawWidth
+                );
+                ctx.restore();
+                continue;
+            }
+
+            const xOffset = col * imageWidth + (imageWidth - drawWidth) / 2;
+            const yOffset = row * imageHeight + (imageHeight - drawHeight) / 2;
+            ctx.drawImage(img, xOffset, yOffset, drawWidth, drawHeight);
         }
-        collageImages.push(canvas)
+
+        collageImages.push(canvas);
         outputDiv.appendChild(canvas);
-        // const downloadLink = document.createElement('a');
-        // downloadLink.textContent = 'Download Grid ' + (gridIndex + 1);
-        // downloadLink.href = canvas.toDataURL('image/jpeg');
-        // downloadLink.download = `grid_${gridIndex + 1}.jpg`;
-        // outputDiv.appendChild(downloadLink);
         outputDiv.appendChild(document.createElement('br'));
     }
-    toggleLoading(false)
+
+    toggleLoading(false);
 }
 
 function loadImage(file) {
@@ -69,26 +102,12 @@ async function downloadAllImages() {
     const zip = new JSZip();
     const folder = zip.folder("collages");
 
-    // Assume `collageImages` is an array of image elements or URLs of generated collages
     collageImages.forEach((img, index) => {
-        // Convert canvas image to data URL (if using canvas) or use URL directly
         const dataUrl = img.toDataURL("image/png");
-        
-        // Convert data URL to binary and add to zip
         folder.file(`collage-${index + 1}.png`, dataUrl.split(',')[1], { base64: true });
     });
 
-    // Generate zip file and trigger download
     zip.generateAsync({ type: "blob" }).then((content) => {
         saveAs(content, "collages.zip");
-    });
-}
-
-// Register the service worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => {
-        console.log('Service Worker registered successfully.');
-    }).catch(error => {
-        console.log('Service Worker registration failed:', error);
     });
 }
