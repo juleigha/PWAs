@@ -1,7 +1,7 @@
 {
     "name": "Image Grid Generator",
     "short_name": "GridGen",
-    "start_url": "/CollageGen/index.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "orientation": "portrait-primary",
     "background_color": "#ffffff",
