@@ -30,7 +30,7 @@ async function generateCollage() {
     const images = await Promise.all([...fileInput.files].map(file => loadImage(file)));
     const numGrids = Math.ceil(images.length / (gridSize * gridSize));
 
-    outputDiv.innerHTML = ''; 
+    outputDiv.innerHTML = '';
 
     for (let gridIndex = 0; gridIndex < numGrids; gridIndex++) {
         const canvas = document.createElement('canvas');
@@ -49,42 +49,36 @@ async function generateCollage() {
             const row = Math.floor(i / gridSize);
 
             const aspectRatio = img.width / img.height;
-            let drawWidth, drawHeight;
-            if (aspectRatio <= 1) {
-                // Landscape orientation
-                drawWidth = imageWidth;
-                drawHeight = imageWidth / aspectRatio;
-                drawWidth = drawWidth > maxWidth ? maxWidth : drawWidth;
-                drawHeight = drawHeight > maxHeight ? maxHeight : drawHeight;
-                
-            } else {
-                // Portrait orientation, rotate
-                drawHeight = imageHeight;
-                drawWidth = imageHeight * aspectRatio;
-                drawHeight = drawHeight > maxHeight ? maxHeight : drawHeight;
-                drawWidth = drawWidth > maxWidth ? maxWidth : drawWidth;
+            // Landscape photos are rotated 90 degrees so they fill this
+            // grid's portrait-shaped cells better, so the box they need
+            // to fit into has width/height swapped relative to a
+            // portrait photo's box.
+            const isLandscape = aspectRatio > 1;
+            const boxWidth = isLandscape ? maxHeight : maxWidth;
+            const boxHeight = isLandscape ? maxWidth : maxHeight;
+
+            // Scale down to fit inside the box while keeping the photo's
+            // true aspect ratio. (The old code clamped width and height
+            // independently, which could stretch/squish the image.)
+            const scale = Math.min(boxWidth / img.width, boxHeight / img.height);
+            const drawWidth = img.width * scale;
+            const drawHeight = img.height * scale;
+
+            if (isLandscape) {
                 ctx.save();
                 ctx.translate((col + 0.5) * imageWidth, (row + 0.5) * imageHeight);
-                ctx.rotate(-Math.PI / 2); 
-                ctx.drawImage(
-                    img,
-                    -drawHeight / 2,
-                    -drawWidth / 2,
-                    drawHeight,
-                    drawWidth
-                );
+                ctx.rotate(-Math.PI / 2);
+                ctx.drawImage(img, -drawHeight / 2, -drawWidth / 2, drawHeight, drawWidth);
                 ctx.restore();
-                continue;
+            } else {
+                const xOffset = col * imageWidth + (imageWidth - drawWidth) / 2;
+                const yOffset = row * imageHeight + (imageHeight - drawHeight) / 2;
+                ctx.drawImage(img, xOffset, yOffset, drawWidth, drawHeight);
             }
-
-            const xOffset = col * imageWidth + (imageWidth - drawWidth) / 2;
-            const yOffset = row * imageHeight + (imageHeight - drawHeight) / 2;
-            ctx.drawImage(img, xOffset, yOffset, drawWidth, drawHeight);
         }
 
         collageImages.push(canvas);
         outputDiv.appendChild(canvas);
-        outputDiv.appendChild(document.createElement('br'));
     }
 
     toggleLoading(false);
