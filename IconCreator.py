@@ -33,7 +33,7 @@ def resize_and_convert_icon(input_path, output_dir, sizes=[48, 72, 96, 192, 512]
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python resize_icons.py <input_image>")
+        print("Usage: python IconCreator.py <input_image>")
         sys.exit(1)
 
     input_image = sys.argv[1]
