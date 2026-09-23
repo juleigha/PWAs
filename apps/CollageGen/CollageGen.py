@@ -1,6 +1,19 @@
-from PIL import Image
+"""Arrange a folder of photos into fixed-size grid collages.
+
+Splits a list of images into grid_size x grid_size collages (e.g. a 2x2
+grid holds up to 4 photos per output image), resizing each photo to a
+uniform size before pasting it in. Produces as many grid images as
+needed to fit every input photo, saved as sequential JPEGs.
+"""
+
+import argparse
 import math
 import os
+
+from PIL import Image
+
+IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp")
+
 
 def create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 200)):
     """
@@ -15,7 +28,6 @@ def create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 20
     Returns:
         None
     """
-    # Make sure output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
     num_images = len(image_paths)
@@ -23,38 +35,48 @@ def create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 20
     num_grids = math.ceil(num_images / images_per_grid)
 
     for grid_index in range(num_grids):
-        # Create a blank grid canvas
         grid_image = Image.new('RGB', (image_size[0] * grid_size, image_size[1] * grid_size), color='white')
 
-        # Process each image for the current grid
         for i in range(images_per_grid):
             img_index = grid_index * images_per_grid + i
             if img_index >= num_images:
-                break  # No more images, leave blank spaces if needed
-            
-            # Open and resize the image
+                break
+
             img = Image.open(image_paths[img_index])
             img = img.resize(image_size)
 
-            # Calculate position for the image on the grid
             row, col = divmod(i, grid_size)
             pos_x = col * image_size[0]
             pos_y = row * image_size[1]
-            
-            # Paste the image onto the grid
+
             grid_image.paste(img, (pos_x, pos_y))
 
-        # Save the grid image
         output_path = os.path.join(output_dir, f'grid_{grid_index + 1}.jpg')
         grid_image.save(output_path)
         print(f'Saved {output_path}')
 
-# Example usage:
-# Specify paths to your images
-path = "/Documents/dev/scrapbook"
-# image_paths = [f for f in os.listdir(path) if os.isfile(os.join(path, f))]
-print(os.getenv("HOME"))
-print(os.listdir("/data/local/tmp"))
-# image_paths = [f'path/to/your/image_{i}.jpg' for i in range(1, 19)]  # Adjust with your actual image paths
-output_dir = 'output/grids'
-# create_image_grids(image_paths, output_dir, grid_size=2, image_size=(200, 200))
+
+def main():
+    parser = argparse.ArgumentParser(description="Arrange a folder of photos into grid collages.")
+    parser.add_argument("input_dir", help="Folder of images to collage")
+    parser.add_argument("-o", "--output-dir", default="output/grids", help="Where to save the generated grids")
+    parser.add_argument("-g", "--grid-size", type=int, default=2, help="Images per row/column (default: 2, i.e. a 2x2 grid)")
+    parser.add_argument("--width", type=int, default=200, help="Width to resize each photo to (default: 200)")
+    parser.add_argument("--height", type=int, default=200, help="Height to resize each photo to (default: 200)")
+    args = parser.parse_args()
+
+    image_paths = sorted(
+        os.path.join(args.input_dir, f)
+        for f in os.listdir(args.input_dir)
+        if f.lower().endswith(IMAGE_EXTENSIONS)
+    )
+
+    if not image_paths:
+        print(f"No images found in {args.input_dir}")
+        return
+
+    create_image_grids(image_paths, args.output_dir, args.grid_size, (args.width, args.height))
+
+
+if __name__ == "__main__":
+    main()
